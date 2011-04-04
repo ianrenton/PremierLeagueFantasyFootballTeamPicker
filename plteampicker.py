@@ -1,7 +1,7 @@
 #!/usr/bin/python 
 # -*- coding: cp1252 -*-
 # Premier League Fantasy Football Team Picker
-# version 0.2.6 (17 October 2010)
+# version 0.2.7 (11 March 2011)
 # by Ian Renton
 # For details, see http://www.onlydreaming.net/software/premier-league-fantasy-football-team-picker
 # This code is released under the GPLv3 licence (http://www.gnu.org/licenses/gpl.html).
@@ -82,7 +82,7 @@ class TeamPicker:
     def set_initial_text(self):
         # Print header
         introText = "<h2>Optimum Premier League Fantasy Football Team</h2><p style=\"font-weight:bold\">Generated on " + datetime.datetime.now().strftime("%A %d %B %Y at %H:%M:%S.") + "</p>"
-        introText = introText + "<p>Created using Premier League Fantasy Football Team Picker, version 0.2.6 (17 October 2010), by Ian Renton.<br>"
+        introText = introText + "<p>Created using Premier League Fantasy Football Team Picker, version 0.2.7 (11 March 2011), by Ian Renton.<br>"
         introText = introText + "For details and source code, see <a href=\"http://www.onlydreaming.net/software/premier-league-fantasy-football-team-picker\">http://www.onlydreaming.net/software/premier-league-fantasy-football-team-picker</a></p>"
         self.displayUpdate(introText)
 
@@ -156,34 +156,7 @@ class TeamPicker:
 
             # And now the same for the strikers.
             strikerChoices = list(nchoosek(players[4],3))
-
-            # To reduce the number of combinations, we just pick the two goalkeepers
-            # who provide best value for money rather than searching through them all.
-            # Possibly a dubious assumption that goalkeepers are the least worth
-            # worrying about, but hey, it makes this run a lot quicker.
-            players[1].sort(lambda x, y: cmp(y.valueSeason, x.valueSeason))
-            goalkeepers = []
-            goalkeepers.append(players[1][0])
-            goalkeepers.append(players[1][1])
-
-            # For each combination of five defenders, we calculate their combined price
-            # and combined points totals.
-            # Create two functions that, given a list of permutations of players, will return a list of prices of those players in the same order.
-            # Er... I guess if you're not up on your functional programming, this must look a bit hideous...
-            prices = lambda permutations: reduce(lambda total, player: total + player.price, permutations, 0)
-            points = lambda permutations: reduce(lambda total, player: total + player.totalPoints, permutations, 0)
-            #Sorry! Having those simplifies the next bit dramatically though:
-            defChoicesPrice = map(prices, defenderChoices)
-            defChoicesPoints = map(points, defenderChoices)
-
-            # Same for the midfielders.
-            midChoicesPrice = map(prices, midfielderChoices)
-            midChoicesPoints = map(points, midfielderChoices)
-
-            # Same for the strikers.
-            strChoicesPrice = map(prices, strikerChoices)
-            strChoicesPoints = map(points, strikerChoices)
-
+            
             # If we have too many iterations to be possible in sensible time, go back and reduce
             # thresholdDivisor until we have something sensible.
             totalIterations = len(defenderChoices) * len(midfielderChoices) * len(strikerChoices)
@@ -200,6 +173,33 @@ class TeamPicker:
                 if (thresholdDivisor < 1.6):
                     n = 0.025
                 thresholdDivisor = thresholdDivisor - n
+
+        # To reduce the number of combinations, we just pick the two goalkeepers
+        # who provide best value for money rather than searching through them all.
+        # Possibly a dubious assumption that goalkeepers are the least worth
+        # worrying about, but hey, it makes this run a lot quicker.
+        players[1].sort(lambda x, y: cmp(y.valueSeason, x.valueSeason))
+        goalkeepers = []
+        goalkeepers.append(players[1][0])
+        goalkeepers.append(players[1][1])
+
+        # For each combination of five defenders, we calculate their combined price
+        # and combined points totals.
+        # Create two functions that, given a list of permutations of players, will return a list of prices of those players in the same order.
+        # Er... I guess if you're not up on your functional programming, this must look a bit hideous...
+        prices = lambda permutations: reduce(lambda total, player: total + player.price, permutations, 0)
+        points = lambda permutations: reduce(lambda total, player: total + player.totalPoints, permutations, 0)
+        #Sorry! Having those simplifies the next bit dramatically though:
+        defChoicesPrice = map(prices, defenderChoices)
+        defChoicesPoints = map(points, defenderChoices)
+
+        # Same for the midfielders.
+        midChoicesPrice = map(prices, midfielderChoices)
+        midChoicesPoints = map(points, midfielderChoices)
+
+        # Same for the strikers.
+        strChoicesPrice = map(prices, strikerChoices)
+        strChoicesPoints = map(points, strikerChoices)
 
         # Now we iterate through all possible choices for defenders, midfielders and
         # strikers.  In each case, we check to see if this set is better than the one
